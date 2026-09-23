@@ -15,7 +15,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
 
-    <!-- android:largeHeap: Request larger heap for P2P sync GC pressure reduction caused by bisq2 jars -->
     <application
         android:name="network.bisq.mobile.node.main.NodeMainApplication"
         android:allowBackup="false"
@@ -28,6 +27,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting">
+        <!-- android:largeHeap: Request larger heap for P2P sync GC pressure reduction caused by bisq2 jars.
+             Keep comments out of the gap before <application>: the merger inserts library
+             permissions there, and AGP lays that gap out differently for the main output (the
+             universal APK, or armeabi-v7a under -Pabi) than for the rest, so the same ABI would
+             build differently with and without -Pabi. -->
         <activity
             android:name="network.bisq.mobile.node.main.NodeMainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"
