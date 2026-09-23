@@ -44,6 +44,26 @@ Outputs:
 - `apps/clientApp/build/outputs/apk/google/release/`, `apps/nodeApp/build/outputs/apk/release/` — five APKs for the GitHub release: `universal` plus one per ABI. All five are uploaded; the universal stays the sideloading default.
 - `apps/clientApp/build/outputs/apk/fdroid/release/` — four APKs, one per ABI and no universal, uploaded alongside them for F-Droid to verify against.
 
+To check that a tag rebuilds to what was published, run
+[scripts/verify-reproducible-build.sh](../scripts/verify-reproducible-build.sh) with the tag. It rebuilds from a clean clone the way `fdroid.yml` does and compares the per-ABI APKs with the tag's `fdroid.yml` artifact byte for byte, or with `--source release` against the signed release assets the way F-Droid does (`apksigcopier compare`, so `pip install apksigcopier` first). Upload release APKs built from the tagged commit itself: AGP records the commit in `META-INF/version-control-info.textproto` and `BuildConfig.BUILD_COMMIT` carries it into the dex, so a build of any other commit, even one with identical content, cannot verify.
+
+```bash
+./scripts/verify-reproducible-build.sh anode_0.14.1
+./scripts/verify-reproducible-build.sh --source release connect_0.9.1 anode_0.14.1
+# The universal APK exists only in the Bisq Easy release, so it needs --source release.
+./scripts/verify-reproducible-build.sh --source release --abis universal,arm64-v8a anode_0.14.1
+```
+
+By default the script clones both repos fresh. To reuse what you already have:
+
+- `--in-place` builds this checkout. It must be clean and already at the tag.
+- `--bisq2 <dir>` builds bisq2 from your checkout. It must be clean and at the pinned commit.
+- `--skip-bisq2-publish` skips the bisq2 build and uses the jars already in `~/.m2`.
+
+The script never checks anything out for you. One catch: bisq2 bakes its short commit hash into
+the build, and that hash is longer in a full clone than in a shallow one. To verify a release,
+build bisq2 from the same kind of clone the release manager used.
+
 Version codes are `base × 1000 + ABI ordinal` (universal = 0, then armeabi-v7a/arm64-v8a/x86/x86_64 = 1–4), where `base` is the app's version code from [gradle.properties](../gradle.properties). The ordinals are permanent — changing one would rewrite the version code of an already published ABI — and the scheme itself is one-way on Google Play, which only accepts increasing version codes.
 
 Escape hatches: `-PabiSplits=false` restores the previous single-universal-APK behaviour (and lets one invocation build APK + AAB together again); `-Pabi=arm64-v8a` builds just that split, debug builds included.
