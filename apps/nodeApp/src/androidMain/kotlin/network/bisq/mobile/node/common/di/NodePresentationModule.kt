@@ -20,6 +20,7 @@ import network.bisq.mobile.presentation.common.share.ShareFileService
 import network.bisq.mobile.presentation.common.ui.animation.AnimationSettings
 import network.bisq.mobile.presentation.common.ui.components.molecules.ITopBarPresenter
 import network.bisq.mobile.presentation.common.ui.components.molecules.TopBarPresenter
+import network.bisq.mobile.presentation.common.ui.release_update.ReleaseUpdatePresenter
 import network.bisq.mobile.presentation.community.CommunityHubPresenter
 import network.bisq.mobile.presentation.community.contacts.ContactsPresenter
 import network.bisq.mobile.presentation.community.messages.MessagesPresenter
@@ -124,6 +125,10 @@ val androidNodePresentationModule =
                 get(),
             )
         } bind SplashPresenter::class
+
+        // Overrides the shared binding: on the node the restart that finishes an update restarts the
+        // trading node, and the card says so.
+        factory<ReleaseUpdatePresenter> { ReleaseUpdatePresenter(get(), get(), get(), get(), isNodeApp = true) }
 
         factory<DashboardPresenter> {
             NodeDashboardPresenter(

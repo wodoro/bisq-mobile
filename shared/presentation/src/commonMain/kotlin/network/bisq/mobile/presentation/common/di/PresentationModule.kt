@@ -10,6 +10,7 @@ import network.bisq.mobile.presentation.common.ui.navigation.manager.NavigationM
 import network.bisq.mobile.presentation.common.ui.navigation.manager.NavigationManagerImpl
 import network.bisq.mobile.presentation.common.ui.network_banner.NetworkStatusBannerPresenter
 import network.bisq.mobile.presentation.common.ui.platform.getPlatformCurrentTimeProvider
+import network.bisq.mobile.presentation.common.ui.release_update.ReleaseUpdatePresenter
 import network.bisq.mobile.presentation.common.ui.utils.TimeProvider
 import network.bisq.mobile.presentation.device_security.DeviceSecurityPresenter
 import network.bisq.mobile.presentation.guide.trade_guide.TradeGuideOverviewPresenter
@@ -85,6 +86,8 @@ val presentationModule =
 
         factory<NetworkStatusBannerPresenter> { NetworkStatusBannerPresenter(get(), get()) }
         factory<AlertNotificationBannerPresenter> { AlertNotificationBannerPresenter(get(), get(), get()) }
+
+        factory<ReleaseUpdatePresenter> { ReleaseUpdatePresenter(get(), get(), get(), get(), isNodeApp = false) }
 
         factory { ResolveStartupDestinationUseCase(get(), get()) }
         factory<UserAgreementPresenter> {
