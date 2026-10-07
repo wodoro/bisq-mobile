@@ -43,6 +43,7 @@ import network.bisq.mobile.presentation.common.ui.components.atoms.BisqText
 import network.bisq.mobile.presentation.common.ui.components.atoms.layout.BisqGap
 import network.bisq.mobile.presentation.common.ui.components.layout.BisqScrollScaffold
 import network.bisq.mobile.presentation.common.ui.components.molecules.AmountWithCurrency
+import network.bisq.mobile.presentation.common.ui.release_update.DashboardReleaseUpdate
 import network.bisq.mobile.presentation.common.ui.theme.BisqTheme
 import network.bisq.mobile.presentation.common.ui.theme.BisqUIConstants
 import network.bisq.mobile.presentation.common.ui.utils.RememberPresenterLifecycle
@@ -207,6 +208,8 @@ private fun DashboardContent(
                 }
             }
         }
+
+        DashboardReleaseUpdate()
 
         Spacer(modifier = Modifier.fillMaxHeight().weight(0.1f))
         if (tradeRulesConfirmed) {

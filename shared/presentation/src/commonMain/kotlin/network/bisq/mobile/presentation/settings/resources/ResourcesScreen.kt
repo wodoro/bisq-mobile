@@ -22,6 +22,7 @@ import network.bisq.mobile.presentation.common.ui.components.atoms.layout.BisqHD
 import network.bisq.mobile.presentation.common.ui.components.layout.BisqScrollScaffold
 import network.bisq.mobile.presentation.common.ui.components.molecules.TopBar
 import network.bisq.mobile.presentation.common.ui.navigation.NavRoute
+import network.bisq.mobile.presentation.common.ui.release_update.ResourcesReleaseUpdateEntry
 import network.bisq.mobile.presentation.common.ui.theme.BisqTheme
 import network.bisq.mobile.presentation.common.ui.theme.BisqUIConstants
 import network.bisq.mobile.presentation.common.ui.utils.BisqLinks
@@ -55,6 +56,7 @@ fun ResourcesScreen() {
         BisqGap.V1()
 
         Version(uiState.versionInfo)
+        ResourcesReleaseUpdateEntry()
 
         BisqHDivider(modifier = dividerModifier)
         BisqGap.V1()
