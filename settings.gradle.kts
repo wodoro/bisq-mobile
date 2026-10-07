@@ -51,6 +51,7 @@ rootProject.name = "BisqApps"
 include(":shared:domain")
 include(":shared:presentation")
 include(":shared:kscan")
+include(":shared:play-update")
 include(":shared:test-utils")
 include(":apps:clientApp")
 include(":apps:nodeApp")

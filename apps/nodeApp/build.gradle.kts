@@ -51,6 +51,7 @@ val distributionFlavors = listOf(googleFlavor, "fdroid")
 val sharedPresentationModule = ":shared:presentation"
 val sharedDomainModule = ":shared:domain"
 val sharedTestUtilsModule = ":shared:test-utils"
+val sharedPlayUpdateModule = ":shared:play-update"
 
 // -------------------- Kotlin Multiplatform Configuration --------------------
 kotlin {
@@ -513,6 +514,8 @@ dependencies {
     // Project modules
     implementation(project(sharedPresentationModule))
     implementation(project(sharedDomainModule))
+    // Play In-App Updates is proprietary: google flavor only, never on the fdroid classpath.
+    "googleImplementation"(project(sharedPlayUpdateModule))
 
     // Debug tools
     debugImplementation(libs.compose.ui.tooling)

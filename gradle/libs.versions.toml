@@ -45,6 +45,8 @@ zxing-cpp = "3.1.1"
 firebase-bom = "33.7.0"
 google-services-plugin = "4.4.2"
 kotlinx-coroutines-play-services = "1.10.2"
+# Play In-App Updates. Proprietary: `google` flavors only, never on an fdroid classpath.
+play-app-update = "2.1.0"
 
 # -------------------- AndroidX --------------------
 androidx-core = "1.16.0"
@@ -146,6 +148,7 @@ zxing-cpp-android = { module = "io.github.zxing-cpp:android", version.ref = "zxi
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinx-coroutines-play-services" }
+play-app-update = { module = "com.google.android.play:app-update", version.ref = "play-app-update" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "androidx-camera" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "androidx-camera" }
 androidx-camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "androidx-camera" }

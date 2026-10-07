@@ -87,6 +87,7 @@ val clientFrameworkBaseName = "ClientApp"
 val sharedPresentationModule = ":shared:presentation"
 val sharedDomainModule = ":shared:domain"
 val sharedKScanModule = ":shared:kscan"
+val sharedPlayUpdateModule = ":shared:play-update"
 val sharedTestUtilsModule = ":shared:test-utils"
 
 dependencies {
@@ -512,6 +513,8 @@ dependencies {
     "googleImplementation"(platform(libs.firebase.bom))
     "googleImplementation"(libs.firebase.messaging)
     "googleImplementation"(libs.kotlinx.coroutines.play.services)
+    // Play In-App Updates, proprietary like FCM and so on the same flavor-scoped configuration.
+    "googleImplementation"(project(sharedPlayUpdateModule))
 }
 
 // -------------------- Build Tasks Configuration --------------------

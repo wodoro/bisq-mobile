@@ -1,5 +1,6 @@
 package network.bisq.mobile.client.common.di
 
+import network.bisq.mobile.client.common.domain.service.app_update.createInAppUpdateProvider
 import network.bisq.mobile.client.common.domain.service.push_notification.ClientPushNotificationServiceFacade
 import network.bisq.mobile.client.common.domain.service.push_notification.PushNotificationApiGateway
 import network.bisq.mobile.client.common.domain.service.push_notification.PushNotificationTokenProvider
@@ -8,10 +9,10 @@ import network.bisq.mobile.client.main.ClientMainActivity
 import network.bisq.mobile.data.service.AppForegroundController
 import network.bisq.mobile.data.service.ForegroundDetector
 import network.bisq.mobile.data.service.push_notification.PushNotificationServiceFacade
+import network.bisq.mobile.data.utils.AppUpdateLinker
 import network.bisq.mobile.domain.analytics.NativeSentryInitializer
 import network.bisq.mobile.domain.analytics.SentryJavaNativeSentryInitializer
 import network.bisq.mobile.domain.service.app_update.InAppUpdateProvider
-import network.bisq.mobile.domain.service.app_update.UnsupportedInAppUpdateProvider
 import network.bisq.mobile.presentation.common.notification.ForegroundServiceController
 import network.bisq.mobile.presentation.common.notification.ForegroundServiceControllerImpl
 import network.bisq.mobile.presentation.common.notification.NotificationController
@@ -19,6 +20,7 @@ import network.bisq.mobile.presentation.common.notification.NotificationControll
 import network.bisq.mobile.presentation.common.service.OpenTradesNotificationService
 import network.bisq.mobile.presentation.common.service.PrivateChatNotificationService
 import network.bisq.mobile.presentation.common.service.PublicChatNotificationService
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -53,7 +55,11 @@ val androidClientDomainModule =
             ClientPushNotificationServiceFacade(get(), get(), get(), get(), get())
         }
 
-        single<InAppUpdateProvider> { UnsupportedInAppUpdateProvider() }
+        // The transport is chosen by the distribution flavor, like the push token provider. Created
+        // at start so the Play provider tracks the resumed activity it shows Play's dialog over.
+        single<InAppUpdateProvider>(createdAtStart = true) {
+            createInAppUpdateProvider(androidApplication(), get<AppUpdateLinker>().getUpdateChannel())
+        }
 
         // Native Sentry SDK initializer. Unconditionally bound — release builds
         // ship the SDK linked and inert; the user-settings toggle + dev gate are
