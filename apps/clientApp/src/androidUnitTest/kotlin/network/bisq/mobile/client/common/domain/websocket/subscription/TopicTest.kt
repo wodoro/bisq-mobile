@@ -1,6 +1,7 @@
 package network.bisq.mobile.client.common.domain.websocket.subscription
 
 import network.bisq.mobile.client.common.data.model.alert.AuthorizedAlertDataDto
+import network.bisq.mobile.client.common.data.model.release.ReleaseNotificationDto
 import network.bisq.mobile.i18n.I18nSupport
 import network.bisq.mobile.i18n.i18n
 import org.junit.Before
@@ -37,7 +38,16 @@ class TopicTest {
                 Topic.TRADE_RESTRICTING_ALERT,
                 Topic.CONTACTS,
                 Topic.NETWORK_INFO,
+                Topic.RELEASE_NOTIFICATIONS,
             )
         assertEquals(expected, Topic.entries.filter { it.replaceIsFullState }.toSet())
+    }
+
+    @Test
+    fun `release notifications topic exposes expected wire metadata`() {
+        assertEquals("RELEASE_NOTIFICATIONS", Topic.RELEASE_NOTIFICATIONS.name)
+        assertEquals(typeOf<List<ReleaseNotificationDto>>(), Topic.RELEASE_NOTIFICATIONS.typeOf)
+        assertEquals(TopicImportance.COSMETIC, Topic.RELEASE_NOTIFICATIONS.importance)
+        assertEquals(Topic.RELEASE_NOTIFICATIONS.titleKey.i18n(), Topic.RELEASE_NOTIFICATIONS.i18n())
     }
 }
