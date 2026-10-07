@@ -75,6 +75,7 @@ class NodeApplicationLifecycleServiceTest : NodeKoinIntegrationTestBase() {
             reputationServiceFacade = mockk(relaxed = true),
             alertNotificationsServiceFacade = mockk(relaxed = true),
             tradeRestrictingAlertServiceFacade = mockk(relaxed = true),
+            releaseNotificationsServiceFacade = mockk(relaxed = true),
             contactsServiceFacade = mockk(relaxed = true),
             settingsServiceFacade = settingsServiceFacade,
             tradesServiceFacade = mockk(relaxed = true),
