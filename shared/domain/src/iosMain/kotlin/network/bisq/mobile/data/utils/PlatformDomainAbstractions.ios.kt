@@ -455,10 +455,12 @@ class IOSUrlLauncher : UrlLauncher {
     private fun sanitizeUrlForLog(rawUrl: String): String = rawUrl.take(256).ifEmpty { "invalid-url" }
 }
 
-class IOSAppUpdateLinker : AppUpdateLinker {
+class IOSAppUpdateLinker(
+    private val urlLauncher: UrlLauncher,
+) : AppUpdateLinker {
     override fun getUpdateChannel(): AppUpdateChannel = AppUpdateChannel.IOS_INSTALL_PAGE
 
-    override fun getUpdateUrl(): String = AppUpdateUrls.BISQ_CONNECT_IOS_INSTALL_PAGE
+    override suspend fun openUpdatePage(): Boolean = urlLauncher.openUrl(AppUpdateUrls.BISQ_CONNECT_IOS_INSTALL_PAGE)
 }
 
 class IOSPlatformInfo : PlatformInfo {

@@ -6,10 +6,13 @@ object AppUpdateUrls {
     const val BISQ_CONNECT_IOS_INSTALL_PAGE =
         "https://bisq-network.github.io/bisq-mobile/"
 
-    /** Prefer this on Android so the Play Store app opens directly when present. */
-    fun playStoreMarketUrl(packageName: String): String = "market://details?id=$packageName"
+    /**
+     * Store page of [packageName]. Store apps answer it, Play and F-Droid included, so aim the intent
+     * at one when only that store can update the install.
+     */
+    fun marketDetailsUrl(packageName: String): String = "market://details?id=$packageName"
 
-    /** HTTPS listing — used when [playStoreMarketUrl] cannot be handled. */
+    /** HTTPS listing, used when no app handles [marketDetailsUrl]. */
     fun playStoreDetailsUrl(packageName: String): String = "https://play.google.com/store/apps/details?id=$packageName"
 }
 
@@ -18,7 +21,10 @@ enum class AppUpdateChannel {
     /** Installed by Google Play, so Play can update it. */
     PLAY_STORE,
 
-    /** Any other Android install (GitHub download, F-Droid, sideloaded APK of either flavor). */
+    /** Installed by the official F-Droid client, which updates it from its repository. */
+    FDROID,
+
+    /** Any other Android install: a GitHub download or another sideloaded APK of either flavor. */
     GITHUB_RELEASES,
 
     /** Bisq Connect on iOS, distributed through TestFlight and AltStore PAL. */

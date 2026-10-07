@@ -89,7 +89,7 @@ class TabContainerPresenter(
         when (action) {
             AlertNotificationUiAction.OnUpdateNow -> {
                 _showTradeRestrictedDialog.value = null
-                navigateToUrl(appUpdateLinker.getUpdateUrl())
+                openAppUpdatePage(appUpdateLinker)
             }
             AlertNotificationUiAction.OnCloseDialog -> _showTradeRestrictedDialog.value = null
             else -> Unit

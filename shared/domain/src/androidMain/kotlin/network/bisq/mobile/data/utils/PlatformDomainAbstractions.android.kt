@@ -159,11 +159,15 @@ class AndroidUrlLauncher(
 
 class AndroidAppUpdateLinker(
     private val context: Context,
+    private val urlLauncher: UrlLauncher,
     private val installingPackageNameProvider: (Context) -> String? = ::resolveInstallingPackageName,
 ) : AppUpdateLinker {
     private companion object {
         private const val GOOGLE_PLAY_INSTALLER = "com.android.vending"
         private const val GOOGLE_PLAY_FEEDBACK = "com.google.android.feedback"
+
+        // The official F-Droid client and its slimmed-down "basic" build.
+        private val FDROID_INSTALLERS = setOf("org.fdroid.fdroid", "org.fdroid.basic")
 
         fun resolveInstallingPackageName(context: Context): String? =
             runCatching {
@@ -178,23 +182,47 @@ class AndroidAppUpdateLinker(
             }.getOrNull()
     }
 
-    override fun getUpdateChannel(): AppUpdateChannel =
-        if (isGooglePlayInstall()) {
-            AppUpdateChannel.PLAY_STORE
-        } else {
-            AppUpdateChannel.GITHUB_RELEASES
+    private val log = getLogger("AndroidAppUpdateLinker")
+
+    override fun getUpdateChannel(): AppUpdateChannel = channelOf(installingPackageName())
+
+    override suspend fun openUpdatePage(): Boolean {
+        val installer = installingPackageName()
+        return when (channelOf(installer)) {
+            AppUpdateChannel.PLAY_STORE -> urlLauncher.openUrl(AppUpdateUrls.marketDetailsUrl(context.packageName))
+            AppUpdateChannel.FDROID ->
+                (installer != null && openInInstaller(installer)) || urlLauncher.openUrl(AppUpdateUrls.GITHUB_RELEASES)
+            AppUpdateChannel.GITHUB_RELEASES, AppUpdateChannel.IOS_INSTALL_PAGE -> urlLauncher.openUrl(AppUpdateUrls.GITHUB_RELEASES)
+        }
+    }
+
+    private fun installingPackageName(): String? = runCatching { installingPackageNameProvider(context) }.getOrNull()
+
+    private fun channelOf(installer: String?): AppUpdateChannel =
+        when (installer) {
+            GOOGLE_PLAY_INSTALLER, GOOGLE_PLAY_FEEDBACK -> AppUpdateChannel.PLAY_STORE
+            in FDROID_INSTALLERS -> AppUpdateChannel.FDROID
+            else -> AppUpdateChannel.GITHUB_RELEASES
         }
 
-    override fun getUpdateUrl(): String =
-        if (getUpdateChannel() == AppUpdateChannel.PLAY_STORE) {
-            AppUpdateUrls.playStoreMarketUrl(context.packageName)
-        } else {
-            AppUpdateUrls.GITHUB_RELEASES
+    /**
+     * Shows this app's page in the store that installed it. Aimed at that store on purpose: left
+     * open, Play would answer too and show the google build, whose different signing key cannot
+     * update this install. The installer of an app is always visible to it, so no `<queries>` entry
+     * is needed.
+     */
+    private fun openInInstaller(installer: String): Boolean {
+        val intent =
+            Intent(Intent.ACTION_VIEW, AppUpdateUrls.marketDetailsUrl(context.packageName).toUri())
+                .setPackage(installer)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        return try {
+            context.startActivity(intent)
+            true
+        } catch (_: ActivityNotFoundException) {
+            log.w { "The installing store cannot show this app; opening the release page instead" }
+            false
         }
-
-    private fun isGooglePlayInstall(): Boolean {
-        val installer = runCatching { installingPackageNameProvider(context) }.getOrNull() ?: return false
-        return installer == GOOGLE_PLAY_INSTALLER || installer == GOOGLE_PLAY_FEEDBACK
     }
 }
 

@@ -3,6 +3,7 @@ package network.bisq.mobile.presentation.common.ui.base
 import androidx.annotation.CallSuper
 import androidx.compose.material3.SnackbarDuration
 import androidx.navigation.NavOptionsBuilder
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -11,6 +12,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import network.bisq.mobile.data.utils.AppUpdateLinker
 import network.bisq.mobile.data.utils.getPlatformInfo
 import network.bisq.mobile.domain.analytics.AnalyticsEvent
 import network.bisq.mobile.domain.analytics.AnalyticsService
@@ -342,6 +344,30 @@ abstract class BasePresenter(
         presenterScope.launch {
             try {
                 mainPresenterForUrlNavigation()?.navigateToUrlWithLauncher(url)
+            } finally {
+                hideLoading()
+            }
+        }
+    }
+
+    /**
+     * Opens the page that updates this install, which [appUpdateLinker] resolves (and for an F-Droid
+     * install aims at the F-Droid app), with the same loading and failure feedback as [navigateToUrl].
+     */
+    protected fun openAppUpdatePage(appUpdateLinker: AppUpdateLinker) {
+        showLoading()
+        presenterScope.launch {
+            try {
+                val opened =
+                    try {
+                        appUpdateLinker.openUpdatePage()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        log.e(e) { "Failed to open the app update page" }
+                        false
+                    }
+                if (!opened) showSnackbar("mobile.error.cannotOpenUrl".i18n(), SnackbarType.ERROR)
             } finally {
                 hideLoading()
             }

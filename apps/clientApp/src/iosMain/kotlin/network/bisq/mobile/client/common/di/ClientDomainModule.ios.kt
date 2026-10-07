@@ -90,7 +90,7 @@ val iosClientDomainModule =
             )
         }
         single<UrlLauncher> { IOSUrlLauncher() }
-        single<AppUpdateLinker> { IOSAppUpdateLinker() }
+        single<AppUpdateLinker> { IOSAppUpdateLinker(get()) }
         // TestFlight and AltStore PAL manage updates themselves; the card links to the install page.
         single<InAppUpdateProvider> { UnsupportedInAppUpdateProvider() }
         // Native Sentry SDK initializer. Unconditionally bound — the

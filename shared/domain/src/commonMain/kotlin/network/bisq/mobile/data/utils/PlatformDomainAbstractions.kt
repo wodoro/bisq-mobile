@@ -21,8 +21,11 @@ interface UrlLauncher {
 interface AppUpdateLinker {
     fun getUpdateChannel(): AppUpdateChannel
 
-    /** The page that updates this install, always resolved app-side from [getUpdateChannel]. */
-    fun getUpdateUrl(): String
+    /**
+     * Opens the page that updates this install, always resolved app-side from [getUpdateChannel].
+     * False when nothing could open it.
+     */
+    suspend fun openUpdatePage(): Boolean
 }
 
 /**

@@ -76,7 +76,7 @@ class AndroidUrlLauncherTest {
             }
         val launcher = AndroidUrlLauncher(context)
 
-        val result = runBlocking { launcher.openUrl(AppUpdateUrls.playStoreMarketUrl(packageName)) }
+        val result = runBlocking { launcher.openUrl(AppUpdateUrls.marketDetailsUrl(packageName)) }
 
         assertTrue(result)
         assertEquals(2, context.startActivityCalls)
@@ -89,7 +89,7 @@ class AndroidUrlLauncherTest {
         val context = TestContext(ActivityNotFoundException("No handler"))
         val launcher = AndroidUrlLauncher(context)
 
-        val result = runBlocking { launcher.openUrl(AppUpdateUrls.playStoreMarketUrl(packageName)) }
+        val result = runBlocking { launcher.openUrl(AppUpdateUrls.marketDetailsUrl(packageName)) }
 
         assertFalse(result)
         assertEquals(2, context.startActivityCalls)

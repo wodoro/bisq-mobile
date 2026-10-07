@@ -58,6 +58,7 @@ class ReleaseUpdateCardUiTest : BisqComposeUiTestBase() {
             "mobile.dashboard.releaseUpdate.action.restart",
             "mobile.dashboard.releaseUpdate.action.viewOnGithub",
             "mobile.dashboard.releaseUpdate.action.openPlayStore",
+            "mobile.dashboard.releaseUpdate.action.openFdroid",
             "mobile.dashboard.releaseUpdate.action.openInstallPage",
             "mobile.dashboard.releaseUpdate.downloading",
             "mobile.dashboard.releaseUpdate.downloadProgressPercent",
@@ -93,6 +94,12 @@ class ReleaseUpdateCardUiTest : BisqComposeUiTestBase() {
     fun `a Play install without an in-app update opens the store listing`() {
         showCard(state(channel = AppUpdateChannel.PLAY_STORE))
         assertPrimaryAction("mobile.dashboard.releaseUpdate.action.openPlayStore".i18n(), ReleaseUpdateUiAction.OnOpenExternalUpdateLink)
+    }
+
+    @Test
+    fun `an F-Droid install opens F-Droid`() {
+        showCard(state(channel = AppUpdateChannel.FDROID))
+        assertPrimaryAction("mobile.dashboard.releaseUpdate.action.openFdroid".i18n(), ReleaseUpdateUiAction.OnOpenExternalUpdateLink)
     }
 
     @Test

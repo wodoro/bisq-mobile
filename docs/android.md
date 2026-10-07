@@ -65,7 +65,7 @@ two things, the push transport and the in-app update:
 | Relayed push | FCM, opt-in, off by default | none |
 | Background delivery | FCM plus the local foreground service | local foreground service only |
 | Settings opt-in | shown | shown, disabled, with an explanation |
-| Release card's update | Play flexible flow on a Play install, otherwise a link | a link to GitHub releases |
+| Release card's update | Play flexible flow on a Play install, otherwise a link | F-Droid's page for an F-Droid install, otherwise GitHub releases |
 
 `fdroid` binds an `UnsupportedPushNotificationTokenProvider`, which reports
 `PushNotificationTokenProvider.isSupported = false`. That travels up through
@@ -158,7 +158,16 @@ provider through a per-flavor `createInAppUpdateProvider` like the push token pr
 The flavor alone does not decide it: Play can only update an install Play made, so the google
 factory also checks `AppUpdateLinker.getUpdateChannel()`, which reads the installer package at
 runtime. A sideloaded google APK therefore gets `UnsupportedInAppUpdateProvider` and the card links
-to GitHub releases, as every fdroid build does.
+to GitHub releases.
+
+Without an in-app flow the card opens the page that updates the install, which `AppUpdateLinker`
+resolves from the same installer record. An install the official F-Droid client made
+(`org.fdroid.fdroid`, `org.fdroid.basic`) opens its page in that client, through a `market://` intent
+aimed at it: left unaimed, Play would answer too and offer the google build, whose signing key
+cannot update an F-Droid install. That also keeps the fdroid build from pointing its users at a page
+that offers a non-free build. Everything else, other F-Droid clients included, opens GitHub releases,
+whose fdroid APKs carry the same signature F-Droid distributes. The alert banner's "Update now" and the
+trade-restricted dialogs go through the same linker.
 
 The Play provider is bound with `createdAtStart`, because Play shows its confirmation over the
 resumed activity, and a provider created after that activity resumed would never have seen it.
