@@ -66,6 +66,7 @@ val androidClientPresentationModule =
                 get(),
                 get(),
                 get(), // tradeRestrictingAlertServiceFacade
+                get(), // releaseNotificationsServiceFacade
                 get(),
                 get(),
                 get(),

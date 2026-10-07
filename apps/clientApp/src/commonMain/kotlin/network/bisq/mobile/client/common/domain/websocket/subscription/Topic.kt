@@ -2,6 +2,7 @@ package network.bisq.mobile.client.common.domain.websocket.subscription
 
 import kotlinx.serialization.Serializable
 import network.bisq.mobile.client.common.data.model.alert.AuthorizedAlertDataDto
+import network.bisq.mobile.client.common.data.model.release.ReleaseNotificationDto
 import network.bisq.mobile.client.common.domain.service.chat.private_chat.TwoPartyPrivateChatChannelDto
 import network.bisq.mobile.client.common.domain.service.chat.private_chat.TwoPartyPrivateChatMessageDto
 import network.bisq.mobile.client.common.domain.service.chat.private_chat.TwoPartyPrivateChatMessageReactionDto
@@ -167,6 +168,16 @@ enum class Topic(
         TopicImportance.COSMETIC,
         "mobile.client.topic.public_chat_reactions.title",
         "mobile.client.topic.public_chat_reactions.desc",
+    ),
+
+    // COSMETIC: missing a release announcement blocks no trade and risks no funds, and the
+    // security manager's minimum-version alert arrives on its own topic regardless. Subscribed only
+    // when the node advertises the release-notifications capability.
+    RELEASE_NOTIFICATIONS(
+        typeOf<List<ReleaseNotificationDto>>(),
+        TopicImportance.COSMETIC,
+        "mobile.client.topic.release_notifications.title",
+        "mobile.client.topic.release_notifications.desc",
     ),
     ;
 

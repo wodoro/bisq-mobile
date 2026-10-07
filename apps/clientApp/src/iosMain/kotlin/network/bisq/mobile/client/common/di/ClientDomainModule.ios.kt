@@ -15,6 +15,8 @@ import network.bisq.mobile.data.utils.IOSAppUpdateLinker
 import network.bisq.mobile.data.utils.IOSUrlLauncher
 import network.bisq.mobile.data.utils.UrlLauncher
 import network.bisq.mobile.domain.analytics.NativeSentryInitializer
+import network.bisq.mobile.domain.service.app_update.InAppUpdateProvider
+import network.bisq.mobile.domain.service.app_update.UnsupportedInAppUpdateProvider
 import network.bisq.mobile.presentation.common.notification.ForegroundServiceController
 import network.bisq.mobile.presentation.common.notification.ForegroundServiceControllerImpl
 import network.bisq.mobile.presentation.common.notification.NotificationController
@@ -67,6 +69,7 @@ val iosClientDomainModule =
                 get(), // reputationServiceFacade
                 get(), // alertNotificationsServiceFacade
                 get(), // tradeRestrictingAlertServiceFacade
+                get(), // releaseNotificationsServiceFacade
                 get(), // contactsServiceFacade
                 get(), // settingsServiceFacade
                 get(), // tradesServiceFacade
@@ -88,6 +91,8 @@ val iosClientDomainModule =
         }
         single<UrlLauncher> { IOSUrlLauncher() }
         single<AppUpdateLinker> { IOSAppUpdateLinker() }
+        // TestFlight and AltStore PAL manage updates themselves; the card links to the install page.
+        single<InAppUpdateProvider> { UnsupportedInAppUpdateProvider() }
         // Native Sentry SDK initializer. Unconditionally bound — the
         // user-settings toggle + dev gate are the runtime gates. iOS already
         // statically links Sentry.framework via the pod() declaration in

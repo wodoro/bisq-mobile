@@ -34,6 +34,7 @@ import network.bisq.mobile.data.service.network.NetworkServiceFacade
 import network.bisq.mobile.data.service.network.TorBootstrapNotReadyException
 import network.bisq.mobile.data.service.offers.OffersServiceFacade
 import network.bisq.mobile.data.service.push_notification.PushNotificationServiceFacade
+import network.bisq.mobile.data.service.release.ReleaseNotificationsServiceFacade
 import network.bisq.mobile.data.service.reputation.ReputationServiceFacade
 import network.bisq.mobile.data.service.settings.SettingsServiceFacade
 import network.bisq.mobile.data.service.trades.TradesServiceFacade
@@ -74,6 +75,7 @@ class ClientApplicationLifecycleServiceTest : ClientKoinIntegrationTestBase() {
     private val configServiceFacade: ConfigServiceFacade = mockk(relaxed = true)
     private val alertNotificationsServiceFacade: AlertNotificationsServiceFacade = mockk(relaxed = true)
     private val tradeRestrictingAlertServiceFacade: TradeRestrictingAlertServiceFacade = mockk(relaxed = true)
+    private val releaseNotificationsServiceFacade: ReleaseNotificationsServiceFacade = mockk(relaxed = true)
     private val contactsServiceFacade: ContactsServiceFacade = mockk(relaxed = true)
     private val settingsServiceFacade: SettingsServiceFacade = mockk(relaxed = true)
     private val tradesServiceFacade: TradesServiceFacade = mockk(relaxed = true)
@@ -117,6 +119,7 @@ class ClientApplicationLifecycleServiceTest : ClientKoinIntegrationTestBase() {
                 reputationServiceFacade = reputationServiceFacade,
                 alertNotificationsServiceFacade = alertNotificationsServiceFacade,
                 tradeRestrictingAlertServiceFacade = tradeRestrictingAlertServiceFacade,
+                releaseNotificationsServiceFacade = releaseNotificationsServiceFacade,
                 contactsServiceFacade = contactsServiceFacade,
                 settingsServiceFacade = settingsServiceFacade,
                 tradesServiceFacade = tradesServiceFacade,
@@ -167,6 +170,7 @@ class ClientApplicationLifecycleServiceTest : ClientKoinIntegrationTestBase() {
                     "config.activate",
                     "alert.activate",
                     "tradeRestrictingAlert.activate",
+                    "releaseNotifications.activate",
                     "contacts.activate",
                     "userProfile.activate",
                     "messageDelivery.activate",
@@ -464,6 +468,7 @@ class ClientApplicationLifecycleServiceTest : ClientKoinIntegrationTestBase() {
                     "messageDelivery.deactivate",
                     "userProfile.deactivate",
                     "contacts.deactivate",
+                    "releaseNotifications.deactivate",
                     "tradeRestrictingAlert.deactivate",
                     "alert.deactivate",
                     "config.deactivate",
@@ -511,6 +516,7 @@ class ClientApplicationLifecycleServiceTest : ClientKoinIntegrationTestBase() {
                     "messageDelivery.deactivate",
                     "userProfile.deactivate",
                     "contacts.deactivate",
+                    "releaseNotifications.deactivate",
                     "tradeRestrictingAlert.deactivate",
                     "alert.deactivate",
                     "config.deactivate",
@@ -576,6 +582,7 @@ class ClientApplicationLifecycleServiceTest : ClientKoinIntegrationTestBase() {
         coEvery { configServiceFacade.activate() } answers { order += "config.activate" }
         coEvery { alertNotificationsServiceFacade.activate() } answers { order += "alert.activate" }
         coEvery { tradeRestrictingAlertServiceFacade.activate() } answers { order += "tradeRestrictingAlert.activate" }
+        coEvery { releaseNotificationsServiceFacade.activate() } answers { order += "releaseNotifications.activate" }
         coEvery { contactsServiceFacade.activate() } answers { order += "contacts.activate" }
         coEvery { userProfileServiceFacade.activate() } answers { order += "userProfile.activate" }
         coEvery { messageDeliveryServiceFacade.activate() } answers { order += "messageDelivery.activate" }
@@ -591,6 +598,7 @@ class ClientApplicationLifecycleServiceTest : ClientKoinIntegrationTestBase() {
         coEvery { messageDeliveryServiceFacade.deactivate() } answers { order += "messageDelivery.deactivate" }
         coEvery { userProfileServiceFacade.deactivate() } answers { order += "userProfile.deactivate" }
         coEvery { contactsServiceFacade.deactivate() } answers { order += "contacts.deactivate" }
+        coEvery { releaseNotificationsServiceFacade.deactivate() } answers { order += "releaseNotifications.deactivate" }
         coEvery { tradeRestrictingAlertServiceFacade.deactivate() } answers { order += "tradeRestrictingAlert.deactivate" }
         coEvery { alertNotificationsServiceFacade.deactivate() } answers { order += "alert.deactivate" }
         coEvery { configServiceFacade.deactivate() } answers { order += "config.deactivate" }

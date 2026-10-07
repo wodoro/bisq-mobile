@@ -10,6 +10,8 @@ import network.bisq.mobile.data.service.ForegroundDetector
 import network.bisq.mobile.data.service.push_notification.PushNotificationServiceFacade
 import network.bisq.mobile.domain.analytics.NativeSentryInitializer
 import network.bisq.mobile.domain.analytics.SentryJavaNativeSentryInitializer
+import network.bisq.mobile.domain.service.app_update.InAppUpdateProvider
+import network.bisq.mobile.domain.service.app_update.UnsupportedInAppUpdateProvider
 import network.bisq.mobile.presentation.common.notification.ForegroundServiceController
 import network.bisq.mobile.presentation.common.notification.ForegroundServiceControllerImpl
 import network.bisq.mobile.presentation.common.notification.NotificationController
@@ -50,6 +52,8 @@ val androidClientDomainModule =
         single<PushNotificationServiceFacade> {
             ClientPushNotificationServiceFacade(get(), get(), get(), get(), get())
         }
+
+        single<InAppUpdateProvider> { UnsupportedInAppUpdateProvider() }
 
         // Native Sentry SDK initializer. Unconditionally bound — release builds
         // ship the SDK linked and inert; the user-settings toggle + dev gate are

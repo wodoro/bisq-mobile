@@ -52,6 +52,8 @@ import network.bisq.mobile.client.common.domain.service.network.ClientNetworkSer
 import network.bisq.mobile.client.common.domain.service.network.NetworkApiGateway
 import network.bisq.mobile.client.common.domain.service.offers.ClientOffersServiceFacade
 import network.bisq.mobile.client.common.domain.service.offers.OfferbookApiGateway
+import network.bisq.mobile.client.common.domain.service.release.ClientReleaseNotificationsServiceFacade
+import network.bisq.mobile.client.common.domain.service.release.ReleaseNotificationsApiGateway
 import network.bisq.mobile.client.common.domain.service.reputation.ClientReputationServiceFacade
 import network.bisq.mobile.client.common.domain.service.reputation.ReputationApiGateway
 import network.bisq.mobile.client.common.domain.service.settings.ClientSettingsServiceFacade
@@ -112,6 +114,7 @@ import network.bisq.mobile.data.service.network.ConnectivityService
 import network.bisq.mobile.data.service.network.KmpTorService
 import network.bisq.mobile.data.service.network.NetworkServiceFacade
 import network.bisq.mobile.data.service.offers.OffersServiceFacade
+import network.bisq.mobile.data.service.release.ReleaseNotificationsServiceFacade
 import network.bisq.mobile.data.service.reputation.ReputationServiceFacade
 import network.bisq.mobile.data.service.settings.SettingsServiceFacade
 import network.bisq.mobile.data.service.trades.TradesServiceFacade
@@ -127,6 +130,7 @@ import network.bisq.mobile.domain.analytics.BufferedAnalyticsService
 import network.bisq.mobile.domain.analytics.createBufferedAnalyticsService
 import network.bisq.mobile.domain.model.PlatformType
 import network.bisq.mobile.domain.repository.SettingsRepository
+import network.bisq.mobile.domain.service.app_update.ReleaseUpdateService
 import network.bisq.mobile.domain.service.capabilities.BackendCapabilitiesService
 import network.bisq.mobile.domain.service.capabilities.DefaultBackendCapabilitiesService
 import network.bisq.mobile.domain.service.community.CommunityHubService
@@ -494,6 +498,16 @@ val clientDomainModule =
                 get(),
             )
         }
+
+        single { ReleaseNotificationsApiGateway(get()) }
+        single<ReleaseNotificationsServiceFacade> {
+            ClientReleaseNotificationsServiceFacade(
+                get(),
+                get(),
+                get(),
+            )
+        }
+        single { ReleaseUpdateService(get(), get(), get(), get()) }
 
         single { ContactsApiGateway(get(), get()) }
         single<ContactsServiceFacade> {

@@ -31,6 +31,7 @@ import network.bisq.mobile.data.service.network.KmpTorService
 import network.bisq.mobile.data.service.network.NetworkServiceFacade
 import network.bisq.mobile.data.service.offers.OffersServiceFacade
 import network.bisq.mobile.data.service.push_notification.PushNotificationServiceFacade
+import network.bisq.mobile.data.service.release.ReleaseNotificationsServiceFacade
 import network.bisq.mobile.data.service.reputation.ReputationServiceFacade
 import network.bisq.mobile.data.service.settings.SettingsServiceFacade
 import network.bisq.mobile.data.service.trades.TradesServiceFacade
@@ -68,6 +69,7 @@ class ClientApplicationLifecycleService(
     private val reputationServiceFacade: ReputationServiceFacade,
     private val alertNotificationsServiceFacade: AlertNotificationsServiceFacade,
     private val tradeRestrictingAlertServiceFacade: TradeRestrictingAlertServiceFacade,
+    private val releaseNotificationsServiceFacade: ReleaseNotificationsServiceFacade,
     private val contactsServiceFacade: ContactsServiceFacade,
     private val settingsServiceFacade: SettingsServiceFacade,
     private val tradesServiceFacade: TradesServiceFacade,
@@ -162,6 +164,7 @@ class ClientApplicationLifecycleService(
         configServiceFacade.activate()
         alertNotificationsServiceFacade.activate()
         tradeRestrictingAlertServiceFacade.activate()
+        releaseNotificationsServiceFacade.activate()
         contactsServiceFacade.activate()
         userProfileServiceFacade.activate()
         messageDeliveryServiceFacade.activate()
@@ -225,6 +228,7 @@ class ClientApplicationLifecycleService(
         messageDeliveryServiceFacade.deactivate()
         userProfileServiceFacade.deactivate()
         contactsServiceFacade.deactivate()
+        releaseNotificationsServiceFacade.deactivate()
         tradeRestrictingAlertServiceFacade.deactivate()
         alertNotificationsServiceFacade.deactivate()
         configServiceFacade.deactivate()

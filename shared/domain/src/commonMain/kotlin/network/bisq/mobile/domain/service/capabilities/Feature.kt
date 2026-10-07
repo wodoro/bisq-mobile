@@ -16,6 +16,7 @@ enum class Feature(
     PRIVATE_CHAT("private-chat"),
     CONTACTS("contacts"),
     PUBLIC_CHAT("public-chat"),
+    RELEASE_NOTIFICATIONS("release-notifications"),
     ;
 
     companion object {
