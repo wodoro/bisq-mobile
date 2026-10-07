@@ -19,6 +19,10 @@ class ClientTradeRestrictingAlertServiceFacade(
     private val _alert = MutableStateFlow<AuthorizedAlertData?>(null)
     override val alert: StateFlow<AuthorizedAlertData?> = _alert.asStateFlow()
 
+    // Always null: Connect embeds no bisq2 core, its trades run on the trusted node, and the
+    // alert's minimum version is checked against that node's core. No Connect update lifts it.
+    override val minVersionRequiredForTrading: StateFlow<String?> = MutableStateFlow<String?>(null).asStateFlow()
+
     override suspend fun activate() {
         super.activate()
 

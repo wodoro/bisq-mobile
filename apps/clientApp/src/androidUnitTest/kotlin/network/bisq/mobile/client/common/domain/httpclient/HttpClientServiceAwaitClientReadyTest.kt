@@ -67,6 +67,8 @@ class HttpClientServiceAwaitClientReadyTest : ClientKoinIntegrationTestBase() {
                     isDemo: Boolean,
                     isIOS: Boolean,
                 ) = "test/1.0"
+
+                override fun getAppVersion() = "1.0"
             }
     }
 

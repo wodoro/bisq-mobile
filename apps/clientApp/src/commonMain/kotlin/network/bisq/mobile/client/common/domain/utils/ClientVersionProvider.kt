@@ -1,6 +1,8 @@
 package network.bisq.mobile.client.common.domain.utils
 
 import network.bisq.mobile.client.shared.BuildConfig
+import network.bisq.mobile.data.utils.getPlatformInfo
+import network.bisq.mobile.domain.model.PlatformType
 import network.bisq.mobile.domain.utils.VersionProvider
 import network.bisq.mobile.i18n.i18n
 
@@ -50,4 +52,6 @@ class ClientVersionProvider(
         val appVersion = getAppVersion(isDemo, isIOS)
         return "${BuildConfig.APP_NAME} v$appVersion"
     }
+
+    override fun getAppVersion(): String = if (getPlatformInfo().type == PlatformType.IOS) BuildConfig.IOS_APP_VERSION else BuildConfig.ANDROID_APP_VERSION
 }

@@ -65,6 +65,8 @@ class HttpClientServiceTest : ClientKoinIntegrationTestBase() {
                         isDemo: Boolean,
                         isIOS: Boolean,
                     ) = "test/1.0"
+
+                    override fun getAppVersion() = "1.0"
                 },
             defaultHost = "127.0.0.1",
             defaultPort = 8090,
