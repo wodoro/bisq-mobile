@@ -732,7 +732,7 @@ log_note "DONE  S10-domain-ios  verdict=$verdict  ${elapsed}s"
 fi
 run_swift 10 S10-swift
 gradle_stop
-run_case 10 S10-node-tests CI ci default ":apps:nodeApp:testDebugUnitTest :apps:nodeApp:testReleaseUnitTest" "--info" success
+run_case 10 S10-node-tests CI ci default ":apps:nodeApp:testGoogleDebugUnitTest :apps:nodeApp:testGoogleReleaseUnitTest :apps:nodeApp:testFdroidDebugUnitTest" "--info" success
 
 # ---------------------------------------------------------------------------
 # Section 11
