@@ -1,6 +1,5 @@
 package network.bisq.mobile.node.common.domain.service.alert
 
-import bisq.bonded_roles.release.AppType
 import bisq.bonded_roles.security_manager.alert.AuthorizedAlertDataUtils
 import bisq.common.application.ApplicationVersion
 import bisq.common.observable.Pin
@@ -12,7 +11,13 @@ import network.bisq.mobile.data.service.alert.TradeRestrictingAlertServiceFacade
 import network.bisq.mobile.domain.model.alert.AuthorizedAlertData
 import network.bisq.mobile.node.common.domain.mapping.alert.toDomainOrNull
 import network.bisq.mobile.node.common.domain.service.AndroidApplicationService
+import bisq.bonded_roles.security_manager.alert.AuthorizedAlertData as AuthorizedAlertDataBisq2
 
+/**
+ * Lets the UI refuse a trade action up front, with the reason, instead of the user meeting the
+ * trade service's exception. So both properties mirror the checks BisqEasyTradeService runs before
+ * every trade action (verifyTradingNotOnHalt, verifyMinVersionForTrading), with the same AppType.
+ */
 class NodeTradeRestrictingAlertServiceFacade(
     private val provider: AndroidApplicationService.Provider,
 ) : TradeRestrictingAlertServiceFacade() {
@@ -43,21 +48,23 @@ class NodeTradeRestrictingAlertServiceFacade(
     }
 
     private fun refreshAlert() {
-        _alert.value =
-            AuthorizedAlertDataUtils
-                .findMostRecentTradeRestrictingAlert(
-                    alertService.authorizedAlertDataSet.stream(),
-                    AppType.MOBILE_CLIENT,
-                ).map { it.toDomainOrNull() }
-                .orElse(null)
+        _alert.value = findAlertRestrictingTrading()?.toDomainOrNull()
         _minVersionRequiredForTrading.value = findMinVersionBlockingTrading()
     }
 
-    // The check BisqEasyTradeService runs before every trade action, with the AppType that
-    // AndroidApplicationService builds it with, so this reports a block exactly when trading has one.
+    // A halt always restricts. A version requirement restricts only while the embedded core is
+    // older, so a node that already updated is not held back by an alert that is still published.
+    private fun findAlertRestrictingTrading(): AuthorizedAlertDataBisq2? =
+        AuthorizedAlertDataUtils
+            .findMostRecentTradeRestrictingAlert(alertService.authorizedAlertDataSet.stream(), AndroidApplicationService.APP_TYPE)
+            .filter { it.isHaltTrading || it.minVersion.map(::isCoreBelow).orElse(false) }
+            .orElse(null)
+
     private fun findMinVersionBlockingTrading(): String? =
         AuthorizedAlertDataUtils
-            .findMinRequiredVersionForTrading(alertService.authorizedAlertDataSet.stream(), AppType.MOBILE_NODE)
-            .filter { Version.isValid(it) && ApplicationVersion.getVersion().below(it) }
+            .findMinRequiredVersionForTrading(alertService.authorizedAlertDataSet.stream(), AndroidApplicationService.APP_TYPE)
+            .filter(::isCoreBelow)
             .orElse(null)
+
+    private fun isCoreBelow(minVersion: String): Boolean = Version.isValid(minVersion) && ApplicationVersion.getVersion().below(minVersion)
 }

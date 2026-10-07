@@ -131,8 +131,11 @@ class AndroidApplicationService(
             Supplier { applicationService.notificationService }
         var tradeService: Supplier<TradeService> =
             Supplier { applicationService.tradeService }
+
+        // The instance the trade service gates on. bondedRolesService initializes it, so it is the
+        // one that actually receives alerts.
         var alertService: Supplier<AlertService> =
-            Supplier { applicationService.alertService }
+            Supplier { applicationService.bondedRolesService.alertService }
         var alertNotificationsService: Supplier<AlertNotificationsService> =
             Supplier { applicationService.alertNotificationsService }
         var favouriteMarketsService: Supplier<FavouriteMarketsService> =
@@ -151,6 +154,12 @@ class AndroidApplicationService(
 
     companion object {
         const val STARTUP_TIMEOUT_SEC: Long = 120
+
+        /**
+         * The AppType the trade service is built with, and therefore the one its trading checks
+         * apply. Anything mirroring those checks has to use it too.
+         */
+        val APP_TYPE: AppType = AppType.MOBILE_NODE
         const val SHUTDOWN_TIMEOUT_SEC: Long = 10
     }
 
@@ -220,7 +229,6 @@ class AndroidApplicationService(
     val notificationService: NotificationService
     val tradeService: TradeService
     val bisqEasyService: BisqEasyService
-    val alertService: AlertService
     val alertNotificationsService: AlertNotificationsService
     val favouriteMarketsService: FavouriteMarketsService
     val dontShowAgainService: DontShowAgainService
@@ -268,7 +276,7 @@ class AndroidApplicationService(
                 settingsService,
                 accountService,
                 burningManService,
-                AppType.MOBILE_NODE,
+                APP_TYPE,
             )
 
         bisqEasyService =
@@ -289,10 +297,8 @@ class AndroidApplicationService(
                 tradeService,
             )
 
-        alertService = AlertService(authorizedBondedRolesService)
-
         alertNotificationsService =
-            AlertNotificationsService(settingsService, bondedRolesService.alertService, AppType.MOBILE_NODE)
+            AlertNotificationsService(settingsService, bondedRolesService.alertService, APP_TYPE)
 
         // Owned by SettingsService, which also runs its lifecycle.
         favouriteMarketsService = settingsService.favouriteMarketsService
