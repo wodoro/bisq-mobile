@@ -46,7 +46,6 @@ import network.bisq.mobile.domain.analytics.createBufferedAnalyticsService
 import network.bisq.mobile.domain.repository.SettingsRepository
 import network.bisq.mobile.domain.service.app_update.InAppUpdateProvider
 import network.bisq.mobile.domain.service.app_update.ReleaseUpdateService
-import network.bisq.mobile.domain.service.app_update.UnsupportedInAppUpdateProvider
 import network.bisq.mobile.domain.service.capabilities.BackendCapabilitiesService
 import network.bisq.mobile.domain.service.capabilities.DefaultBackendCapabilitiesService
 import network.bisq.mobile.domain.service.community.CommunityHubService
@@ -61,6 +60,8 @@ import network.bisq.mobile.node.common.domain.service.NodeApplicationLifecycleSe
 import network.bisq.mobile.node.common.domain.service.accounts.NodeUserDefinedAccountsServiceFacade
 import network.bisq.mobile.node.common.domain.service.alert.NodeAlertNotificationsServiceFacade
 import network.bisq.mobile.node.common.domain.service.alert.NodeTradeRestrictingAlertServiceFacade
+import network.bisq.mobile.node.common.domain.service.app_update.UpdateRestartPersistence
+import network.bisq.mobile.node.common.domain.service.app_update.createInAppUpdateProvider
 import network.bisq.mobile.node.common.domain.service.bootstrap.NodeApplicationBootstrapFacade
 import network.bisq.mobile.node.common.domain.service.cat_hash.AndroidNodeCatHashService
 import network.bisq.mobile.node.common.domain.service.chat.private_chat.NodePrivateChatServiceFacade
@@ -94,6 +95,7 @@ import network.bisq.mobile.presentation.common.service.OpenTradesNotificationSer
 import network.bisq.mobile.presentation.common.service.PrivateChatNotificationService
 import network.bisq.mobile.presentation.common.service.PublicChatNotificationService
 import okio.Path.Companion.toOkioPath
+import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -225,7 +227,17 @@ val androidNodeDomainModule =
 
         single { ReleaseUpdateService(get(), get(), get(), get()) }
 
-        single<InAppUpdateProvider> { UnsupportedInAppUpdateProvider() }
+        // Chosen by the distribution flavor. Created at start so the Play provider tracks the resumed
+        // activity it shows Play's dialog over. The persistence is resolved only when Play restarts the
+        // node, so creating the provider early does not build the bisq2 core early.
+        single<InAppUpdateProvider>(createdAtStart = true) {
+            createInAppUpdateProvider(
+                androidApplication(),
+                get<AppUpdateLinker>().getUpdateChannel(),
+                prepareForRestart = { get<UpdateRestartPersistence>().persistCriticalStores() },
+            )
+        }
+        single { UpdateRestartPersistence(get()) }
 
         single<ContactsServiceFacade> { NodeContactsServiceFacade(get()) }
 

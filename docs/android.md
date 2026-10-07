@@ -57,13 +57,15 @@ Escape hatches: `-PabiSplits=false` restores the previous single-universal-APK b
 
 `google` is what ships to Google Play and as the sideloadable GitHub APK. `fdroid` exists because
 F-Droid's inclusion policy rejects proprietary dependencies outright rather than flagging them, and
-Firebase Cloud Messaging is one. The flavors differ in exactly one thing, the push transport:
+Firebase Cloud Messaging is one, Play In-App Updates another. The flavors differ in exactly those
+two things, the push transport and the in-app update:
 
 | | `google` | `fdroid` |
 |---|---|---|
 | Relayed push | FCM, opt-in, off by default | none |
 | Background delivery | FCM plus the local foreground service | local foreground service only |
 | Settings opt-in | shown | shown, disabled, with an explanation |
+| Release card's update | Play flexible flow on a Play install, otherwise a link | a link to GitHub releases |
 
 `fdroid` binds an `UnsupportedPushNotificationTokenProvider`, which reports
 `PushNotificationTokenProvider.isSupported = false`. That travels up through
@@ -142,7 +144,28 @@ nodeApp has the same `google` and `fdroid` flavors with the same rules: AGP's so
 `google` as the primary flavor for artifact names (`Bisq_Easy-<version>-<abi>-<versionCode>-fdroid.apk`
 for the other), and one `applicationId` and version code shared by both. It has no FCM and no
 `google-services.json`. `apkClasspathNames` in its build script lists every flavored variant's
-classpaths, because the BouncyCastle strip there has to reach each APK classpath R8 sees.
+classpaths, because the BouncyCastle strip there has to reach each APK classpath R8 sees. The
+flavors differ only in the in-app update below.
+
+### In-app updates
+
+The dashboard's release card (`ReleaseUpdateCard`) updates a Google Play install in place through
+the Play In-App Updates flexible flow. That library is proprietary, so it lives in
+`:shared:play-update`, which only the apps' `google` flavors depend on, and each app picks its
+provider through a per-flavor `createInAppUpdateProvider` like the push token provider. The
+`testFdroid` tests assert that no Play class is on the fdroid classpath.
+
+The flavor alone does not decide it: Play can only update an install Play made, so the google
+factory also checks `AppUpdateLinker.getUpdateChannel()`, which reads the installer package at
+runtime. A sideloaded google APK therefore gets `UnsupportedInAppUpdateProvider` and the card links
+to GitHub releases, as every fdroid build does.
+
+The Play provider is bound with `createdAtStart`, because Play shows its confirmation over the
+resumed activity, and a provider created after that activity resumed would never have seen it.
+
+Installing kills the process without running JVM shutdown hooks. On the node that is where bisq2's
+`RateLimitedPersistenceClient` catches up on writes it dropped, so before `completeUpdate()` the
+node writes its identity and trade stores directly (`UpdateRestartPersistence`).
 
 ---
 
