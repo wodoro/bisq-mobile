@@ -259,7 +259,7 @@ val androidNodeDomainModule =
         single { CommunityHubService(get()) }
 
         single<UrlLauncher> { AndroidUrlLauncher(androidContext()) }
-        single<AppUpdateLinker> { AndroidAppUpdateLinker(androidContext()) }
+        single<AppUpdateLinker> { AndroidAppUpdateLinker(androidContext(), get()) }
 
         single<NodeApplicationLifecycleService> {
             NodeApplicationLifecycleService(

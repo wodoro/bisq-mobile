@@ -19,7 +19,6 @@ import network.bisq.mobile.i18n.I18nSupport
 import network.bisq.mobile.i18n.i18n
 import network.bisq.mobile.presentation.common.test_utils.FakeAppUpdateLinker
 import network.bisq.mobile.presentation.common.test_utils.MainPresenterTestFactory
-import network.bisq.mobile.presentation.common.test_utils.TEST_APP_UPDATE_URL
 import network.bisq.mobile.presentation.common.test_utils.probeStateFlow
 import network.bisq.mobile.test.presentation.coroutines.PlatformPresentationKoinTestBase
 import kotlin.test.Test
@@ -138,7 +137,7 @@ class AlertNotificationBannerPresenterTest : PlatformPresentationKoinTestBase() 
     fun `update now opens app update url`() =
         runTest {
             val appUpdateLinker = mockk<AppUpdateLinker>()
-            every { appUpdateLinker.getUpdateUrl() } returns TEST_APP_UPDATE_URL
+            coEvery { appUpdateLinker.openUpdatePage() } returns true
             val urlLauncher = mockk<UrlLauncher>(relaxed = true)
             coEvery { urlLauncher.openUrl(any()) } returns true
             val alertsFlow = MutableStateFlow(listOf(alert(id = "emergency", type = AlertType.EMERGENCY, date = 5L)))
@@ -155,8 +154,7 @@ class AlertNotificationBannerPresenterTest : PlatformPresentationKoinTestBase() 
             presenter.onAction(AlertNotificationUiAction.OnUpdateNow)
             advanceUntilIdle()
 
-            verify(exactly = 1) { appUpdateLinker.getUpdateUrl() }
-            coVerify(exactly = 1) { urlLauncher.openUrl(TEST_APP_UPDATE_URL) }
+            coVerify(exactly = 1) { appUpdateLinker.openUpdatePage() }
         }
 
     @Test

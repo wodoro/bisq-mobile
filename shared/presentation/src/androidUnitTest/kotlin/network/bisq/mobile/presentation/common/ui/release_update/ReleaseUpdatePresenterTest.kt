@@ -1,8 +1,6 @@
 package network.bisq.mobile.presentation.common.ui.release_update
 
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +9,6 @@ import network.bisq.mobile.data.model.Settings
 import network.bisq.mobile.data.service.alert.TradeRestrictingAlertServiceFacade
 import network.bisq.mobile.data.service.release.ReleaseNotificationsServiceFacade
 import network.bisq.mobile.data.utils.AppUpdateChannel
-import network.bisq.mobile.data.utils.UrlLauncher
 import network.bisq.mobile.domain.model.alert.AuthorizedAlertData
 import network.bisq.mobile.domain.model.release.ReleaseNotification
 import network.bisq.mobile.domain.model.release.ReleaseVersion
@@ -19,10 +16,11 @@ import network.bisq.mobile.domain.service.app_update.InAppUpdateProvider
 import network.bisq.mobile.domain.service.app_update.InAppUpdateState
 import network.bisq.mobile.domain.service.app_update.ReleaseUpdateService
 import network.bisq.mobile.domain.utils.VersionProvider
+import network.bisq.mobile.i18n.i18n
 import network.bisq.mobile.presentation.common.test_utils.FakeAppUpdateLinker
 import network.bisq.mobile.presentation.common.test_utils.MainPresenterTestFactory
-import network.bisq.mobile.presentation.common.test_utils.TEST_APP_UPDATE_URL
 import network.bisq.mobile.presentation.common.test_utils.probeStateFlow
+import network.bisq.mobile.presentation.common.ui.components.organisms.SnackbarType
 import network.bisq.mobile.test.mocks.SettingsRepositoryMock
 import network.bisq.mobile.test.presentation.coroutines.PlatformPresentationKoinTestBase
 import kotlin.test.Test
@@ -36,13 +34,15 @@ class ReleaseUpdatePresenterTest : PlatformPresentationKoinTestBase() {
     private val minVersionRequiredForTrading = MutableStateFlow<String?>(null)
     private val settingsRepository = SettingsRepositoryMock()
     private val inAppUpdateProvider = FakeInAppUpdateProvider()
-    private val urlLauncher = mockk<UrlLauncher>(relaxed = true)
+
+    private lateinit var appUpdateLinker: FakeAppUpdateLinker
 
     private fun createPresenter(
         updateChannel: AppUpdateChannel = AppUpdateChannel.GITHUB_RELEASES,
         isNodeApp: Boolean = false,
+        updatePageOpens: Boolean = true,
     ): ReleaseUpdatePresenter {
-        coEvery { urlLauncher.openUrl(any()) } returns true
+        appUpdateLinker = FakeAppUpdateLinker(updateChannel = updateChannel, opens = updatePageOpens)
         val releaseUpdateService =
             ReleaseUpdateService(
                 FakeReleaseNotificationsServiceFacade(notifications),
@@ -52,10 +52,10 @@ class ReleaseUpdatePresenterTest : PlatformPresentationKoinTestBase() {
                 testDispatcher,
             )
         return ReleaseUpdatePresenter(
-            MainPresenterTestFactory.create(urlLauncher = urlLauncher),
+            MainPresenterTestFactory.create(),
             releaseUpdateService,
             inAppUpdateProvider,
-            FakeAppUpdateLinker(updateChannel = updateChannel),
+            appUpdateLinker,
             isNodeApp,
         )
     }
@@ -198,7 +198,7 @@ class ReleaseUpdatePresenterTest : PlatformPresentationKoinTestBase() {
         }
 
     @Test
-    fun `the external link opens the destination the linker resolves`() =
+    fun `the external link opens the page the linker resolves`() =
         runTest {
             notifications.value = listOf(notification("0.15.0"))
             val presenter = createPresenter()
@@ -206,7 +206,20 @@ class ReleaseUpdatePresenterTest : PlatformPresentationKoinTestBase() {
             presenter.onAction(ReleaseUpdateUiAction.OnOpenExternalUpdateLink)
             advanceUntilIdle()
 
-            coVerify(exactly = 1) { urlLauncher.openUrl(TEST_APP_UPDATE_URL) }
+            assertEquals(1, appUpdateLinker.openUpdatePageCount)
+            verify(exactly = 0) { globalUiManager.showSnackbar(any(), any(), any(), any()) }
+        }
+
+    @Test
+    fun `a page that cannot be opened is reported`() =
+        runTest {
+            notifications.value = listOf(notification("0.15.0"))
+            val presenter = createPresenter(updatePageOpens = false)
+
+            presenter.onAction(ReleaseUpdateUiAction.OnOpenExternalUpdateLink)
+            advanceUntilIdle()
+
+            verify(exactly = 1) { globalUiManager.showSnackbar("mobile.error.cannotOpenUrl".i18n(), SnackbarType.ERROR, any(), any()) }
         }
 
     @Test

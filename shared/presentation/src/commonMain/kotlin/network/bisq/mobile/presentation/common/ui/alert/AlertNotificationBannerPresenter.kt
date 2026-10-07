@@ -48,7 +48,7 @@ class AlertNotificationBannerPresenter(
         when (action) {
             is AlertNotificationUiAction.OnDismissAlertNotification -> dismissAlert(action.alertId)
             is AlertNotificationUiAction.ExpandAlertNotification -> expandAlert(action.alertId)
-            AlertNotificationUiAction.OnUpdateNow -> navigateToUrl(appUpdateLinker.getUpdateUrl())
+            AlertNotificationUiAction.OnUpdateNow -> openAppUpdatePage(appUpdateLinker)
             AlertNotificationUiAction.OnCloseDialog -> currentAlertDialogId.value = null
         }
     }

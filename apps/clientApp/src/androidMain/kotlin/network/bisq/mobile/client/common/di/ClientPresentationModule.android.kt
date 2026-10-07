@@ -28,7 +28,7 @@ import org.koin.dsl.module
 val androidClientPresentationModule =
     module {
         single<UrlLauncher> { AndroidUrlLauncher(androidContext()) }
-        single<AppUpdateLinker> { AndroidAppUpdateLinker(androidContext()) }
+        single<AppUpdateLinker> { AndroidAppUpdateLinker(androidContext(), get()) }
         single {
             val context = androidContext()
             val filesDir = context.filesDir.absolutePath

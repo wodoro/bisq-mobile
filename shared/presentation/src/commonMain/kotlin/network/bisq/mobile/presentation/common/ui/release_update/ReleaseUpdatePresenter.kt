@@ -69,7 +69,7 @@ class ReleaseUpdatePresenter(
             is ReleaseUpdateUiAction.OnDismissVersion -> dismissVersion(action.version)
             ReleaseUpdateUiAction.OnStartInAppUpdate -> inAppUpdateProvider.startUpdate()
             ReleaseUpdateUiAction.OnRestartToUpdate -> inAppUpdateProvider.completeUpdate()
-            ReleaseUpdateUiAction.OnOpenExternalUpdateLink -> navigateToUrl(appUpdateLinker.getUpdateUrl())
+            ReleaseUpdateUiAction.OnOpenExternalUpdateLink -> openAppUpdatePage(appUpdateLinker)
         }
     }
 

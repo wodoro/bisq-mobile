@@ -259,6 +259,7 @@ internal fun ReleaseUpdatePrimaryButton(
 private fun externalLinkLabel(channel: AppUpdateChannel): String =
     when (channel) {
         AppUpdateChannel.PLAY_STORE -> "mobile.dashboard.releaseUpdate.action.openPlayStore".i18n()
+        AppUpdateChannel.FDROID -> "mobile.dashboard.releaseUpdate.action.openFdroid".i18n()
         AppUpdateChannel.GITHUB_RELEASES -> "mobile.dashboard.releaseUpdate.action.viewOnGithub".i18n()
         AppUpdateChannel.IOS_INSTALL_PAGE -> "mobile.dashboard.releaseUpdate.action.openInstallPage".i18n()
     }

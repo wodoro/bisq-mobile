@@ -28,7 +28,6 @@ import network.bisq.mobile.domain.repository.OfferbookFilterConfigRepository
 import network.bisq.mobile.presentation.common.test_utils.FakeAppUpdateLinker
 import network.bisq.mobile.presentation.common.test_utils.FakeConfigServiceFacade
 import network.bisq.mobile.presentation.common.test_utils.MainPresenterTestFactory
-import network.bisq.mobile.presentation.common.test_utils.TEST_APP_UPDATE_URL
 import network.bisq.mobile.presentation.common.test_utils.TestApplicationLifecycleService
 import network.bisq.mobile.presentation.common.ui.alert.AlertNotificationUiAction
 import network.bisq.mobile.presentation.common.ui.base.GlobalUiManager
@@ -199,7 +198,7 @@ class OfferbookPresenterTradeRestrictionTest : PlatformPresentationKoinTestBase(
     fun `OnUpdateNow clears showTradeRestrictedDialog and opens update URL`() =
         runTest {
             val appUpdateLinker = mockk<AppUpdateLinker>()
-            every { appUpdateLinker.getUpdateUrl() } returns TEST_APP_UPDATE_URL
+            coEvery { appUpdateLinker.openUpdatePage() } returns true
             val urlLauncher = mockk<UrlLauncher>()
             coEvery { urlLauncher.openUrl(any()) } returns true
             val presenter =
@@ -217,8 +216,7 @@ class OfferbookPresenterTradeRestrictionTest : PlatformPresentationKoinTestBase(
             advanceUntilIdle()
 
             assertNull(presenter.showTradeRestrictedDialog.value)
-            verify(exactly = 1) { appUpdateLinker.getUpdateUrl() }
-            coVerify(exactly = 1) { urlLauncher.openUrl(TEST_APP_UPDATE_URL) }
+            coVerify(exactly = 1) { appUpdateLinker.openUpdatePage() }
         }
 
     // -------------------------------------------------------------------------
