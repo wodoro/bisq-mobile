@@ -67,6 +67,14 @@ class SettingsSerializerTest {
             assertEquals(CommunityNotificationLevel.ALL, settings.notificationLevelFor(ChatChannelDomainEnum.SUPPORT))
         }
 
+    @Test
+    fun `readFrom gives no ignored release versions to settings stored before the field existed`() =
+        runTest {
+            val settings = SettingsSerializer.readFrom(Buffer().writeUtf8("{\"firstLaunch\":false}"))
+
+            assertEquals(emptySet(), settings.ignoredReleaseVersions)
+        }
+
     private fun sampleSettings() =
         Settings(
             firstLaunch = false,
@@ -74,5 +82,6 @@ class SettingsSerializerTest {
             discussionsNotificationLevel = CommunityNotificationLevel.OFF,
             supportNotificationLevel = CommunityNotificationLevel.MENTIONS_AND_REPLIES,
             rememberOfferbookFilterPreferences = false,
+            ignoredReleaseVersions = setOf("0.15.0"),
         )
 }

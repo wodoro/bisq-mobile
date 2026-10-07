@@ -30,4 +30,6 @@ class NodeVersionProvider : VersionProvider {
         val appName = getAppName(isDemo)
         return "$appName v${BuildNodeConfig.APP_VERSION}"
     }
+
+    override fun getAppVersion(): String = BuildNodeConfig.APP_VERSION
 }

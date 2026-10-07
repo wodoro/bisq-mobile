@@ -456,6 +456,8 @@ class IOSUrlLauncher : UrlLauncher {
 }
 
 class IOSAppUpdateLinker : AppUpdateLinker {
+    override fun getUpdateChannel(): AppUpdateChannel = AppUpdateChannel.IOS_INSTALL_PAGE
+
     override fun getUpdateUrl(): String = AppUpdateUrls.BISQ_CONNECT_IOS_INSTALL_PAGE
 }
 

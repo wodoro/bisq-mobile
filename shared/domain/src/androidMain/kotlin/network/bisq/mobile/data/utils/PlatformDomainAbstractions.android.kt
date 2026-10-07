@@ -178,8 +178,15 @@ class AndroidAppUpdateLinker(
             }.getOrNull()
     }
 
-    override fun getUpdateUrl(): String =
+    override fun getUpdateChannel(): AppUpdateChannel =
         if (isGooglePlayInstall()) {
+            AppUpdateChannel.PLAY_STORE
+        } else {
+            AppUpdateChannel.GITHUB_RELEASES
+        }
+
+    override fun getUpdateUrl(): String =
+        if (getUpdateChannel() == AppUpdateChannel.PLAY_STORE) {
             AppUpdateUrls.playStoreMarketUrl(context.packageName)
         } else {
             AppUpdateUrls.GITHUB_RELEASES

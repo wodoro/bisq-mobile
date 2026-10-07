@@ -39,6 +39,18 @@ class AndroidAppUpdateLinkerTest {
     }
 
     @Test
+    fun `reports the Play Store channel only when Google Play installed the app`() {
+        val context = RuntimeEnvironment.getApplication()
+
+        assertEquals(AppUpdateChannel.PLAY_STORE, AndroidAppUpdateLinker(context) { GOOGLE_PLAY_INSTALLER }.getUpdateChannel())
+        assertEquals(AppUpdateChannel.PLAY_STORE, AndroidAppUpdateLinker(context) { GOOGLE_PLAY_FEEDBACK }.getUpdateChannel())
+        // A sideloaded APK of the google flavor reports no installer or a different one, and must
+        // never be routed to Play.
+        assertEquals(AppUpdateChannel.GITHUB_RELEASES, AndroidAppUpdateLinker(context) { null }.getUpdateChannel())
+        assertEquals(AppUpdateChannel.GITHUB_RELEASES, AndroidAppUpdateLinker(context) { "org.fdroid.fdroid" }.getUpdateChannel())
+    }
+
+    @Test
     fun `returns GitHub releases when installer is unknown`() {
         val context = RuntimeEnvironment.getApplication()
         val linker = AndroidAppUpdateLinker(context) { null }

@@ -45,6 +45,9 @@ data class Settings(
     // explicit "Don't show again" decision, cleared again when the device is seen clean.
     val deviceSecurityBaseline: DeviceSecurityBaseline = DeviceSecurityBaseline.UNSET,
     val deviceSecurityWarningSuppressed: Boolean = false,
+    // Release versions the user chose to ignore on the dashboard's update card, mirroring desktop's
+    // IGNORE_VERSION cookie. Only versions above the running app are kept.
+    val ignoredReleaseVersions: Set<String> = emptySet(),
 )
 
 @Serializable
