@@ -322,4 +322,6 @@ jobs:
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "ndk;26.1.10909125"
 
       - name: Run Node App Tests
-        run: ./gradlew :apps:nodeApp:testDebugUnitTest :apps:nodeApp:testReleaseUnitTest --info
+        # The shared tests run under the google flavor; fdroid adds its own flavor sources, which
+        # only differ in the in-app update provider, so its debug variant covers them.
+        run: ./gradlew :apps:nodeApp:testGoogleDebugUnitTest :apps:nodeApp:testGoogleReleaseUnitTest :apps:nodeApp:testFdroidDebugUnitTest --info

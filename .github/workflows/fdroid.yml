@@ -8,7 +8,8 @@ name: F-Droid artifacts
 #
 # Two independent jobs, because their costs are nothing alike:
 #   clientApp  -> the `fdroid` product flavor, which carries no Google dependency at all
-#   nodeApp    -> needs no flavor: it ships a fair amount of com.google.* (Guava, protobuf, gson
+#   nodeApp    -> its `fdroid` product flavor, which drops the proprietary Play In-App Updates
+#                 library. It still ships a fair amount of com.google.* (Guava, protobuf, gson
 #                 and the API protos grpc pulls in) but every one is free software, Apache-2.0
 #                 or BSD-3-Clause, and the verify steps below are what keep it that way with the
 #                 licence of each recorded. It does embed bisq2, whose jars
@@ -165,7 +166,7 @@ jobs:
 
   # ------------------------------------------------------------------- Bisq Easy (nodeApp) --
   node:
-    name: Bisq Easy (bisq2 from source)
+    name: Bisq Easy (fdroid flavor, bisq2 from source)
     runs-on: ubuntu-latest
     if: >-
       (github.event_name == 'workflow_dispatch' && contains(fromJSON('["both","node"]'), inputs.apps))
@@ -284,25 +285,24 @@ jobs:
       - name: Verify no unreviewed Google dependency
         run: |
           ./gradlew :apps:nodeApp:dependencies \
-            --configuration releaseRuntimeClasspath --console=plain -q \
+            --configuration fdroidReleaseRuntimeClasspath --console=plain -q \
             | python3 scripts/verify-fdroid-dependencies.py -
 
       - name: Build unsigned per-ABI APKs
         run: |
-          ./gradlew :apps:nodeApp:assembleRelease \
+          ./gradlew :apps:nodeApp:assembleFdroidRelease \
             -PallowUnsignedRelease=true \
             -Pabi="$ABIS" \
             --no-daemon
 
-      # nodeApp has no flavors to separate, so this is the only thing standing between a new
-      # transitive dependency and a proprietary Google library in the F-Droid build. Guava,
-      # protobuf and the other Apache-2.0 packages it legitimately ships are allowlisted in
-      # the script.
+      # Second net after the dependency gate, as for the client: a proprietary Google library
+      # arriving transitively fails here. Guava, protobuf and the other Apache-2.0 packages the
+      # node legitimately ships are allowlisted in the script.
       - name: Verify the APKs carry no proprietary Google code
         run: |
           python3 scripts/verify-fdroid-apk.py \
-            --mapping apps/nodeApp/build/outputs/mapping/release/mapping.txt \
-            apps/nodeApp/build/outputs/apk/release/*.apk
+            --mapping apps/nodeApp/build/outputs/mapping/fdroidRelease/mapping.txt \
+            apps/nodeApp/build/outputs/apk/fdroid/release/*.apk
 
       - name: Save Gradle dependencies
         if: success() && inputs.ref == '' && steps.gradle-cache.outputs.cache-hit != 'true'
@@ -314,7 +314,7 @@ jobs:
           key: ${{ steps.gradle-cache.outputs.cache-primary-key }}
 
       - name: Checksums
-        working-directory: apps/nodeApp/build/outputs/apk/release
+        working-directory: apps/nodeApp/build/outputs/apk/fdroid/release
         run: |
           sha256sum *.apk | tee SHA256SUMS.txt
 
@@ -325,5 +325,5 @@ jobs:
           retention-days: 14
           if-no-files-found: error
           path: |
-            apps/nodeApp/build/outputs/apk/release/*.apk
-            apps/nodeApp/build/outputs/apk/release/SHA256SUMS.txt
+            apps/nodeApp/build/outputs/apk/fdroid/release/*.apk
+            apps/nodeApp/build/outputs/apk/fdroid/release/SHA256SUMS.txt

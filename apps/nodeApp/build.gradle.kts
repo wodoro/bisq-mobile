@@ -41,6 +41,12 @@ val sentryProguardUuidPlaceholder = "sentryProguardUuid"
 val sharedVersion = project.findProperty("shared.version") as String
 val appName = project.findProperty("node.name") as String
 
+// Name of the flavor that ships to Google Play and as the sideloadable GitHub APK. Read by
+// productFlavors {}, the artifact naming, the BouncyCastle strip, the bisq2 version check and the
+// mapping tasks below, so renaming it cannot silently orphan one of them.
+val googleFlavor = "google"
+val distributionFlavors = listOf(googleFlavor, "fdroid")
+
 // -------------------- Module References --------------------
 val sharedPresentationModule = ":shared:presentation"
 val sharedDomainModule = ":shared:domain"
@@ -110,6 +116,9 @@ extra["requiredCompanionProps"] = listOf("KEYSTORE_PASSWORD", "KEY_ALIAS", "KEY_
 // -------------------- App artifact naming / packaging --------------------
 appArtifacts {
     productName.set(appName)
+    // Keeps `google` APKs named exactly as they always were, so published release assets are
+    // unaffected; fdroid APKs end in `-fdroid`.
+    primaryFlavor.set(googleFlavor)
 }
 
 // -------------------- Android Configuration --------------------
@@ -256,6 +265,15 @@ android {
         }
     }
 
+    // Distribution flavors, as in clientApp. `google` ships to Google Play and as the sideloadable
+    // GitHub APK and carries the Play In-App Updates library; `fdroid` carries no proprietary
+    // dependency, which F-Droid's inclusion policy requires. That library is their only difference.
+    // Flavor sources use AGP's layout (`src/<flavor>/kotlin`), see docs/android.md.
+    flavorDimensions += "distribution"
+    productFlavors {
+        distributionFlavors.forEach { flavor -> create(flavor) { dimension = "distribution" } }
+    }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
@@ -326,11 +344,14 @@ protobuf {
     }
     generateProtoTasks {
         all().forEach { task ->
+            // generate<Variant>[UnitTest|AndroidTest]Proto, where the variant now carries the
+            // flavor (googleDebug); test tasks read the protos extracted for their app variant.
             val variantName =
-                Regex("(debug|release|profile)", RegexOption.IGNORE_CASE)
+                Regex("^generate(.+?)(UnitTest|AndroidTest)?Proto$")
                     .find(task.name)
-                    ?.value
-                    ?.lowercase() ?: "debug"
+                    ?.groupValues
+                    ?.get(1)
+                    ?.replaceFirstChar { it.lowercase() } ?: "googleDebug"
             task.inputs.dir(layout.buildDirectory.dir("/extracted-include-protos/$variantName"))
             task.builtins {
                 create("java")
@@ -404,14 +425,10 @@ class StripShadedBcCompatibility : AttributeCompatibilityRule<Boolean> {
 // stamping the attribute on test classpaths excludes project-local artifacts even with a
 // compatibility rule in place (NoClassDefFoundError on the project's own Kotlin output).
 val apkClasspathNames =
-    setOf(
-        "debugCompileClasspath",
-        "debugRuntimeClasspath",
-        "releaseCompileClasspath",
-        "releaseRuntimeClasspath",
-        "profileCompileClasspath",
-        "profileRuntimeClasspath",
-    )
+    distributionFlavors
+        .flatMap { flavor -> listOf("Debug", "Release", "Profile").map { buildType -> flavor + buildType } }
+        .flatMap { variant -> listOf("${variant}CompileClasspath", "${variant}RuntimeClasspath") }
+        .toSet()
 configurations.matching { it.isCanBeResolved && it.name in apkClasspathNames }.configureEach {
     attributes.attribute(stripShadedBcAttribute, true)
 }
@@ -472,8 +489,9 @@ val verifyBisqCoreDependencyVersions =
     tasks.register<VerifyBisqCoreDependencyVersionsTask>("verifyBisqCoreDependencyVersions") {
         group = "verification"
         description = "Fails when a library of bisq2 core resolves to another version than its jars request"
-        // The classpath of the app which ships
-        rootComponent.set(configurations.named("releaseRuntimeClasspath").flatMap { it.incoming.resolutionResult.rootComponent })
+        // The classpath of the google release: bisq2 core is the same in both flavors, and google
+        // only adds the Play library on top
+        rootComponent.set(configurations.named("${googleFlavor}ReleaseRuntimeClasspath").flatMap { it.incoming.resolutionResult.rootComponent })
     }
 tasks.named("preBuild") { dependsOn(verifyBisqCoreDependencyVersions) }
 
@@ -585,7 +603,7 @@ afterEvaluate {
 
 // -------------------- ProGuard Mapping Configuration --------------------
 extra["moduleName"] = "nodeApp"
-extra["mappingFlavors"] = emptyList<String>()
+extra["mappingFlavors"] = distributionFlavors
 extra["mappingVersionCode"] = versionCodeValue
 apply(from = "$rootDir/gradle/mapping-tasks.gradle.kts")
 

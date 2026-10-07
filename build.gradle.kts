@@ -219,10 +219,9 @@ subprojects {
         configure<kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension> {
             currentProject {
                 instrumentation {
-                    // clientApp's distribution flavors qualify the task name, so the plain
-                    // form no longer matches there; nodeApp has no flavors and still uses it.
+                    // Both apps' distribution flavors qualify the task name. The library
+                    // modules run no release unit tests (see above).
                     disabledForTestTasks.addAll(
-                        "testReleaseUnitTest",
                         "testGoogleReleaseUnitTest",
                         "testFdroidReleaseUnitTest",
                     )

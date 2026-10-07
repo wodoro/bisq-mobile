@@ -7,7 +7,7 @@ a dependency or an API call that assumes a modern JDK.
 
 ## Release packaging
 
-ABI splits are enabled for release APKs ([build-logic/AppArtifactsPlugin](../build-logic/src/main/kotlin/network/bisq/gradle/AppArtifactsPlugin.kt)), and AGP cannot build split APKs and an app bundle in one invocation, so a release is two Gradle runs per app. clientApp's tasks carry its distribution flavor (see below); nodeApp has no flavors and keeps the plain names:
+ABI splits are enabled for release APKs ([build-logic/AppArtifactsPlugin](../build-logic/src/main/kotlin/network/bisq/gradle/AppArtifactsPlugin.kt)), and AGP cannot build split APKs and an app bundle in one invocation, so a release is two Gradle runs per app. Both apps' tasks carry their distribution flavor (see below):
 
 ```bash
 # Bisq Connect (clientApp). `google` is the flavor that ships to Play and GitHub.
@@ -18,8 +18,11 @@ ABI splits are enabled for release APKs ([build-logic/AppArtifactsPlugin](../bui
 # path verifies its own rebuild against these and then redistributes them.
 ./gradlew apps:clientApp:assembleFdroidRelease -Pabi=armeabi-v7a,arm64-v8a,x86,x86_64 --info
 
-# Bisq Easy (nodeApp)
-./gradlew apps:nodeApp:clean apps:nodeApp:bundleRelease --info && ./gradlew apps:nodeApp:assembleRelease --info
+# Bisq Easy (nodeApp), google flavor
+./gradlew apps:nodeApp:clean apps:nodeApp:bundleGoogleRelease --info && ./gradlew apps:nodeApp:assembleGoogleRelease --info
+
+# Bisq Easy, fdroid flavor, per-ABI only for the same reasons as Bisq Connect's.
+./gradlew apps:nodeApp:assembleFdroidRelease -Pabi=armeabi-v7a,arm64-v8a,x86,x86_64 --info
 ```
 
 These fdroid APKs are signed, and they belong in the GitHub release next to the google ones:
@@ -36,13 +39,13 @@ move between a GitHub download and an F-Droid install.
 
 `clean` belongs only to the first run — the second reuses the compiled code and just packages the APKs. Combining `bundleRelease` and `assembleRelease` in one invocation fails at configuration time with a message repeating the two commands above.
 
-clientApp still answers to the unqualified `assembleRelease` / `bundleRelease`, but they are aggregates that build *every* flavor, so a release run would also produce an fdroid AAB nobody wants. Name the flavor.
+Both apps still answer to the unqualified `assembleRelease` / `bundleRelease`, but they are aggregates that build *every* flavor, so a release run would also produce an fdroid AAB nobody wants. Name the flavor.
 
 Outputs:
 
-- `apps/clientApp/build/outputs/bundle/googleRelease/`, `apps/nodeApp/build/outputs/bundle/release/` — one AAB for Google Play, carrying all four ABIs (Play derives per-device splits itself).
-- `apps/clientApp/build/outputs/apk/google/release/`, `apps/nodeApp/build/outputs/apk/release/` — five APKs for the GitHub release: `universal` plus one per ABI. All five are uploaded; the universal stays the sideloading default.
-- `apps/clientApp/build/outputs/apk/fdroid/release/` — four APKs, one per ABI and no universal, uploaded alongside them for F-Droid to verify against.
+- `apps/clientApp/build/outputs/bundle/googleRelease/`, `apps/nodeApp/build/outputs/bundle/googleRelease/`: one AAB for Google Play, carrying all four ABIs (Play derives per-device splits itself).
+- `apps/clientApp/build/outputs/apk/google/release/`, `apps/nodeApp/build/outputs/apk/google/release/`: five APKs for the GitHub release: `universal` plus one per ABI. All five are uploaded; the universal stays the sideloading default.
+- `apps/clientApp/build/outputs/apk/fdroid/release/`, `apps/nodeApp/build/outputs/apk/fdroid/release/`: four APKs, one per ABI and no universal, uploaded alongside them for F-Droid to verify against.
 
 Version codes are `base × 1000 + ABI ordinal` (universal = 0, then armeabi-v7a/arm64-v8a/x86/x86_64 = 1–4), where `base` is the app's version code from [gradle.properties](../gradle.properties). The ordinals are permanent — changing one would rewrite the version code of an already published ABI — and the scheme itself is one-way on Google Play, which only accepts increasing version codes.
 
@@ -50,7 +53,7 @@ Escape hatches: `-PabiSplits=false` restores the previous single-universal-APK b
 
 ---
 
-## Distribution flavors (clientApp only)
+## Distribution flavors
 
 `google` is what ships to Google Play and as the sideloadable GitHub APK. `fdroid` exists because
 F-Droid's inclusion policy rejects proprietary dependencies outright rather than flagging them, and
@@ -132,6 +135,14 @@ F-Droid has to build from a git checkout. It does, but a source tarball would re
 `"unknown"`, changing the dex and failing verification for a reason that looks nothing like its
 cause. Anything else added to `BuildConfig` has to be a function of the source alone for the same
 reason; that is why the wall-clock `BUILD_TS` it replaced had to go.
+
+### nodeApp
+
+nodeApp has the same `google` and `fdroid` flavors with the same rules: AGP's source layout,
+`google` as the primary flavor for artifact names (`Bisq_Easy-<version>-<abi>-<versionCode>-fdroid.apk`
+for the other), and one `applicationId` and version code shared by both. It has no FCM and no
+`google-services.json`. `apkClasspathNames` in its build script lists every flavored variant's
+classpaths, because the BouncyCastle strip there has to reach each APK classpath R8 sees.
 
 ---
 
