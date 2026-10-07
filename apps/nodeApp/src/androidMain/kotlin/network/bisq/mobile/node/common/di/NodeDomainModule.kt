@@ -26,6 +26,7 @@ import network.bisq.mobile.data.service.network.KmpTorService
 import network.bisq.mobile.data.service.network.NetworkServiceFacade
 import network.bisq.mobile.data.service.offers.OffersServiceFacade
 import network.bisq.mobile.data.service.push_notification.PushNotificationServiceFacade
+import network.bisq.mobile.data.service.release.ReleaseNotificationsServiceFacade
 import network.bisq.mobile.data.service.reputation.ReputationServiceFacade
 import network.bisq.mobile.data.service.settings.SettingsServiceFacade
 import network.bisq.mobile.data.service.trades.TradesServiceFacade
@@ -43,6 +44,9 @@ import network.bisq.mobile.domain.analytics.NativeSentryInitializer
 import network.bisq.mobile.domain.analytics.SentryJavaNativeSentryInitializer
 import network.bisq.mobile.domain.analytics.createBufferedAnalyticsService
 import network.bisq.mobile.domain.repository.SettingsRepository
+import network.bisq.mobile.domain.service.app_update.InAppUpdateProvider
+import network.bisq.mobile.domain.service.app_update.ReleaseUpdateService
+import network.bisq.mobile.domain.service.app_update.UnsupportedInAppUpdateProvider
 import network.bisq.mobile.domain.service.capabilities.BackendCapabilitiesService
 import network.bisq.mobile.domain.service.capabilities.DefaultBackendCapabilitiesService
 import network.bisq.mobile.domain.service.community.CommunityHubService
@@ -73,6 +77,7 @@ import network.bisq.mobile.node.common.domain.service.network.NodeConnectivitySe
 import network.bisq.mobile.node.common.domain.service.network.NodeNetworkServiceFacade
 import network.bisq.mobile.node.common.domain.service.offers.NodeOffersServiceFacade
 import network.bisq.mobile.node.common.domain.service.push_notification.NoOpPushNotificationServiceFacade
+import network.bisq.mobile.node.common.domain.service.release.NodeReleaseNotificationsServiceFacade
 import network.bisq.mobile.node.common.domain.service.reputation.NodeReputationServiceFacade
 import network.bisq.mobile.node.common.domain.service.settings.NodeSettingsServiceFacade
 import network.bisq.mobile.node.common.domain.service.trades.NodeTradesServiceFacade
@@ -216,6 +221,12 @@ val androidNodeDomainModule =
 
         single<TradeRestrictingAlertServiceFacade> { NodeTradeRestrictingAlertServiceFacade(get()) }
 
+        single<ReleaseNotificationsServiceFacade> { NodeReleaseNotificationsServiceFacade(get()) }
+
+        single { ReleaseUpdateService(get(), get(), get(), get()) }
+
+        single<InAppUpdateProvider> { UnsupportedInAppUpdateProvider() }
+
         single<ContactsServiceFacade> { NodeContactsServiceFacade(get()) }
 
         single<SettingsServiceFacade> { NodeSettingsServiceFacade(get()) }
@@ -257,6 +268,7 @@ val androidNodeDomainModule =
                 get(),
                 get(),
                 get(),
+                get(), // releaseNotificationsServiceFacade
                 get(),
                 get(),
                 get(),
