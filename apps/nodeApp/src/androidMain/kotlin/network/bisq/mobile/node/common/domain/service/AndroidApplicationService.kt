@@ -311,10 +311,21 @@ class AndroidApplicationService(
         readAllPersisted().join()
         log.i("readAllPersisted took ${(System.currentTimeMillis() - ts)} ms")
 
-        log.i("Starting securityService.initialize()")
-        return securityService
-            .initialize()
-            .thenCompose { result: Boolean? ->
+        // bisq2's base initialize() runs its MigrationService. Overriding without calling it meant no data
+        // migration ever ran on the node, and an app update is exactly when one is needed. A failure takes
+        // the startup failure path below.
+        log.i("Starting migrationService via super.initialize()")
+        val migration =
+            try {
+                super.initialize()
+            } catch (e: Exception) {
+                CompletableFuture.failedFuture(e)
+            }
+        return migration
+            .thenCompose { _: Boolean? ->
+                log.i("Starting securityService.initialize()")
+                securityService.initialize()
+            }.thenCompose { result: Boolean? ->
                 log.i("securityService.initialize() completed with result: $result")
                 setState(State.INITIALIZE_NETWORK)
                 log.i("Starting networkService.initialize()")
